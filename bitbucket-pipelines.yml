@@ -1,0 +1,48 @@
+---
+pipelines:
+  default:
+    - parallel:
+        - step:
+            name: "Terraform linting"
+            image: bahnx/tflint-bundle:v0.34.1-1.0.11
+            script:
+              - "cd terraform/"
+              - "tflint --init"
+              - "terraform init -backend-config='key=mainstates/dummy_runner'"
+              - "tflint --loglevel=info"
+        - step:
+            name: "Terraform security scan with tfsec"
+            image: tfsec/tfsec
+            script:
+              - "tfsec terraform"
+
+  custom:
+    build-with-parameters:
+      - variables:
+          - name: ACTION
+            description: Action to take apply implies ansible
+            default: plan
+            allowed-values:
+              - plan
+              - apply
+              - destroy
+
+      - step:
+          name: Show environment
+          description: Output the environment variables seen by the agent
+          script:
+            - env
+
+      - step:
+          name: "Provision environment"
+          image: hashicorp/terraform
+          script:
+            - cd $BITBUCKET_CLONE_DIR/terraform/
+            - terraform init -no-color -backend-config="key=mainstates/build-runners-spot-fleet"
+            - terraform plan -no-color
+            - >
+              [ $ACTION == 'apply' ] && terraform apply -auto-approve -no-color
+              || echo 'Skipping apply due to action -> $ACTION'
+            - >
+              [ $ACTION == 'destroy' ] && terraform destroy -auto-approve -no-color
+              || echo 'Skipping destroy due to action -> $ACTION'
