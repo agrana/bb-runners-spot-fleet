@@ -44,7 +44,7 @@ resource "aws_key_pair" "initial_key" {
   public_key = # "Initial pubkey to access instances"
 }
 resource "aws_spot_fleet_request" "build_runners" {
-  iam_fleet_role      = "arn:aws:iam::278324298815:role/aws-ec2-spot-fleet-tagging-role"
+  iam_fleet_role      = "arn:aws:iam::111111111111:role/aws-ec2-spot-fleet-tagging-role"
   allocation_strategy = "diversified"
   fleet_type          = "request"
   target_capacity     = 3
