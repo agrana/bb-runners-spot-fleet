@@ -15,7 +15,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = # Youd defaul tags go here. 
+      Project     = # Youd default tags go here. 
     }
   }
 }
